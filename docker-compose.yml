@@ -1,0 +1,61 @@
+services:
+  minecraft:
+    image: itzg/minecraft-server
+    container_name: minecraft
+    restart: unless-stopped
+    ports:
+      - "25565:25565"
+    environment:
+      EULA: "TRUE"
+      VERSION: "1.21.4"
+      TYPE: "VANILLA"
+      MEMORY: "4G"
+    volumes:
+      - ./minecraft:/data
+
+  qbittorrent:
+    image: linuxserver/qbittorrent
+    container_name: qbittorrent
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+      - "6881:6881"
+      - "6881:6881/udp"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/UTC
+      - WEBUI_PORT=8080
+    volumes:
+      - ./qbittorrent:/config
+      - ./downloads:/downloads
+    entrypoint: ["/bin/sh", "-c", "/config/start.sh"]
+  jellyfin:
+    image: jellyfin/jellyfin
+    container_name: jellyfin
+    restart: unless-stopped
+    ports:
+      - "8096:8096"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Rome
+    volumes:
+      - ./jellyfin/config:/config
+      - ./jellyfin/cache:/cache
+      - /home/admin/downloads:/media
+#  sftpgo:
+#    image: drakkan/sftpgo
+#    container_name: sftpgo
+#    restart: unless-stopped
+#    ports:
+#      - "2222:2022"
+#      - "8081:8081"
+#    environment:
+#      - SFTPGO_INITIAL_ADMIN_USERNAME=admin
+#      - SFTPGO_INITIAL_ADMIN_PASSWORD=admin
+#      - SFTPGO_HTTPD__BINDINGS__0__PORT=8081
+#      - SFTPGO_HTTPD__BINDINGS__0__ENABLE_WEB_ADMIN=true
+#      - ~/:/srv/sftpgo/home  # Mount home directory inside container
+#    volumes:
+#      - ./sftpgo:/var/lib/sftpgo
